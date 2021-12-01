@@ -1,12 +1,20 @@
 //Projeto Final de Máquina Elétricas - Grupo 4
-//CCM para controle de um motor brushless e um motor CC
+//CCM para controle de um motor CC
 #include "mbed.h"
 
-Serial pc (USBTX, USBRX);
+Serial pc(USBTX, USBRX);
 
-//Declaração PWM Ponte-H motor CC
-PwmOut mos1 (D12);
-PwmOut mos2 (D11);
+//Pinos de controle do motor CC
+PwmOut horario (D5);
+PwmOut anti (D4);
+
+AnalogIn vrx(A3);
+AnalogIn vry(A5);
+
+DigitalIn en_a(D2);
+
+//Pinos PWM não usados
+/*
 PwmOut mos3 (D9);
 PwmOut mos4 (D8);
 //Declaração PWM controle motor de passo
@@ -15,70 +23,53 @@ PwmOut mos6 (D6);
 PwmOut mos7 (D5);
 PwmOut mos8 (D4);
 
+*/
 //Variáveis de controle da IHM
-bool m_cc = 0;
-bool m_passo = 0;
-
-bool enable = 0;
-
-int ação = 0;
-
-
-
-
+int manual = 0;
+/*
 void toggle()//Função para incrementar dentes quando houver uma borda de subida
-        {
+      {
             i =! i;
         }
-
+*/
 //Declaração de portas e variáveis motor CC
 
 
 int main()
 {
-    printf(\r"Bem vindo professor");
-    wait(1.2);
-    printf(\r"ao centro de comando");
-    wait(1.2);
-    printf(\r"do grupo 4");
-    wait(1.2);
-    printf(\r"Jonas Luis Leonardo (no Balkins)");
-    wait(1.5);
+    printf("\r Bem vindo professor ");
+    wait(1);
+    printf("ao centro de comando ");
+    wait(1);
+    printf("do grupo 4\n");
+    wait(2);
+    printf("\r Jonas  Felps    Leonardo          (no Balkins)\n");
+    wait(2);
+    printf("\n");
 
     while(1) 
     {
+        if (manual == 0)
+        {
+            printf("\r Comandos prontos:\n");
+            printf("\n");
+            wait_ms(200);
+            printf("\r   1. Press M para comandar manualmente\n\n");
+            printf("\r   2. Press D para girar motor no sentido horario por 5s\n\n");
+            printf("\r   3. Press A para girar motor no sentido anti-horario por 5s\n\n");
+        }
+
+        else if (manual == 1)
+        {
+            printf("\rcerto");
+            //float x = vrx.read()*1000;
+            //printf("\r %2f", x);
+        }
+        
         switch (pc.getc())
         {
-            case 'a': m_cc = 1; break;
-            case 'b': m_passo = 1; break; 
+            case 'm': manual = 1; break;
             default: break;
-        }
-
-        // Controle do motor CC
-        if (m_cc == 1):
-        {
-            if (enable == 1)
-            {
-                if (ação == 0)
-                {
-
-                }
-
-                else if (ação == 1 )
-                {
-
-                }
-
-                else if (ação == 1 )
-                {
-                    
-                }
-            }
-        }
-
-        else if (m_passo == 1)
-        {
-
         }
     }
 }
