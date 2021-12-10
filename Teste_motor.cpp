@@ -5,7 +5,6 @@
 Serial pc(USBTX, USBRX);
 
 InterruptIn b_ena(D8);
-InterruptIn b_menu (D7);
 
 Timer contador;
 
@@ -16,6 +15,8 @@ DigitalOut red (D9);
 DigitalOut yel (D10);
 DigitalOut green (D11);
 
+DigitalIn b_menu (D7);
+
 PwmOut enable (D2);
 
 AnalogIn rx (A3);
@@ -25,43 +26,33 @@ AnalogIn pot (A0);
 //Variáveis de controle
 bool manual;
 bool enabled;
-bool menu;
 
 float vel1;
 float tempo_max;
-float y;
-float velocidade_motor;
 
 char opcao;
 
 
-//Enable do motor para controle manual
+
 void toggle()
 {
     enabled =! enabled;
     if (enabled == 1)
     {
-        printf("\n\rENABLED");
+        printf("\n\rENABLED")
     }
     else if (enabled == 0)
     {
-        printf("\n\rUNABLED");
-        
+        printf("\n\rUNABLED")
     }
-    wait_ms(150);
-}
-//Variável de retorno para o menu principal
-void back()
-{
-    menu =! menu;
-    wait_ms(100);
+    
 }
 
 //Comandos prontos
 void foward()
 {
     printf("\e[H\e[2J");
-    printf("\n\r  Escolha o tempo de duracao da acao\n\r");
+    printf("\n\rEscolha o tempo de duracao da acao\n\r");
     scanf("%3f", &tempo_max);
     contador.reset();
     contador.start();
@@ -71,11 +62,7 @@ void foward()
     while(contador <= tempo_max)
     {
         vel1 = pot.read();//Leitura do potenciômetro
-        velocidade_motor = 371.79*(12*vel1)-369.02;
-        if (velocidade_motor >= 0)
-        {
-            printf("\r Velocidade horária do motor[RPM]= %2f", velocidade_motor);
-        }
+        printf("\r leitura= %3f", vel1);
         enable.write(vel1);
         horario = 1;
         anti = 0;
@@ -99,11 +86,7 @@ void backward()
     while(contador <= tempo_max)
     {
         vel1 = pot.read();//Leitura do potenciômetro
-        velocidade_motor = 371.79*(12*vel1)-369.02;
-        if (velocidade_motor >= 0)
-        {
-            printf("\r Velocidade anti-horária do motor[RPM]= %2f", velocidade_motor);
-        }
+        printf("\r leitura= %3f", vel1);
         enable.write(vel1);
         horario = 0;
         anti = 1;
@@ -119,16 +102,14 @@ void backward()
 int main()
 {
     //Estados iniciais
+    
     enable.write(0);
     horario = 0;
     anti = 0;
     manual = 0;
 
-    menu = 0;
     enabled = 0;
-
     b_ena.rise(&toggle);
-    b_menu.rise(&back);
 
     //Introdução
     printf("\e[H\e[2J");
@@ -147,86 +128,64 @@ int main()
         while (manual == 0)
         {
             printf("\e[H\e[2J");
-            red = 0;
-            yel = 0;
-            green = 0;
             enable.write(0);
             horario = 0;
             anti = 0;
             manual = 0;
-            menu = 0;
             printf("\r Comandos prontos:\n");
             printf("\n");
             wait_ms(200);
             printf("\r   1. Press M para comandar manualmente\n\n");
-            printf("\r   2. Press D para girar motor no sentido horario por determinado\n\n");
-            printf("\r   3. Press A para girar motor no sentido anti-horario por tempo determinado\n\n");
-            scanf("\r   %c", &opcao);
-            switch (opcao)
+            printf("\r   2. Press D para girar motor no sentido horario por 10s\n\n");
+            printf("\r   3. Press A para girar motor no sentido anti-horario por 10s\n\n");
+            switch (pc.getc())
             {
-                case 'm': manual = 1;
-                printf("\e[H\e[2J"); 
-                printf("\r  Comando manual\n\n"); 
-                break;
+                case 'm': manual = 1; break;
                 case 'a': foward(); break;
                 case 'd': backward(); break;
             }
         }
 
-        // Comando manual do motor
         while (manual == 1)
         {
-            //Enable desativado
-            if (enabled == 0)
+            printf("\e[H\e[2J");
+            printf("\r Comando manual\n")
+            y = ry.read();
+
+            while (enabled == 0)
             {
                 red = 1;
-                yel = 0;
             }
 
-            //Enable ativado
-            else if (enabled == 1)
+            while (enabled == 1)
             {
-                y = ry.read();
-                yel = 1;
-                red = 0;
+                printf("\r valor y = %2f", y);
+
                 if (y >= 0.6) //Girar o motor
-                {   
-                    green = 1;
+                {
                     float girar = (y/0.4)-1.5;
                     enable.write(girar);
-                    velocidade_motor = 371.79*(12*girar)-369.02;
-                    if (velocidade_motor >= 0)
-                    {
-                        printf("\r  Velocidade anti-horária do motor[RPM]= %2f", velocidade_motor);
-                    }
-                    anti = 0;
-                    horario = 1;
+                    anti = 1;
+                    horario = 0;
                 }
                 else if (y <= 0.4) //Girar o motor
                 {
-                    green = 1;
-                    float girar = (-y/0.4)+1;
+                    
+                    float girar = (y/0.4)-1.5;
                     enable.write(girar);
-                    velocidade_motor = 371.79*(12*girar)-369.02;
-                    if (velocidade_motor >= 0)
-                    {
-                        printf("\r  Velocidade anti-horária do motor[RPM]= %2f", velocidade_motor);
-                    }
                     horario = 0;
                     anti = 1;
                 }
+                
                 else //Manter o motor parado
                 {
-                    printf("\r  Velocidade do motor[RPM]= 0");
-                    green = 0;
+                    
                     anti.write(0);
                     horario.write(0);
                 }
             }
-            if (menu == 1)
-            {
-                manual = 0;
-            }
+
         }
+
     }
 }

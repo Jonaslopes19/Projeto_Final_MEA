@@ -32,9 +32,19 @@ float tempo_max;
 float y;
 float velocidade_motor;
 
+int x;
+
 char opcao;
 
 
+
+void cls()
+{
+    for (x=0, x<10, x++)
+    {
+        printf(\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n)
+    }
+}
 //Enable do motor para controle manual
 void toggle()
 {
@@ -146,7 +156,7 @@ int main()
     {
         while (manual == 0)
         {
-            printf("\e[H\e[2J");
+            printf("\e[1;1H\e[2J");
             red = 0;
             yel = 0;
             green = 0;
@@ -165,7 +175,7 @@ int main()
             switch (opcao)
             {
                 case 'm': manual = 1;
-                printf("\e[H\e[2J"); 
+                printf("\e[1;1H\e[2J"); 
                 printf("\r  Comando manual\n\n"); 
                 break;
                 case 'a': foward(); break;
