@@ -1,5 +1,6 @@
 //Projeto Final de Máquina Elétricas - Grupo 4
-//CCM para controle de um motor CC
+//CCM para controle de Step Motor
+
 #include "mbed.h"
 
 Serial pc(USBTX, USBRX);
